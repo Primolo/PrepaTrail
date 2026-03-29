@@ -1,0 +1,35 @@
+name: Génération rapport trail
+
+on:
+  push:
+    paths:
+      - 'Activities.csv'   # Se déclenche quand tu pousses le CSV
+  workflow_dispatch:       # Permet aussi de lancer manuellement
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # Nécessaire pour committer index.html
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Générer index.html depuis Activities.csv
+        run: python scripts/generate.py
+
+      - name: Commit et push index.html
+        run: |
+          git config user.name  "TrailBot 🤖"
+          git config user.email "trailbot@noreply.github.com"
+          git add index.html
+          # Ne committer que si index.html a changé
+          git diff --staged --quiet && echo "Pas de changement" || \
+            git commit -m "🏔 Rapport S$(date +'%V') — $(date +'%d/%m/%Y %H:%M')"
+          git push
