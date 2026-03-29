@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0f0a">
+<title>Trail Plan — UTMJ & UTOPIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ── Reset & Variables ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0f0a;
+  --bg2:#111811;
+  --bg3:#182018;
+  --card:#1a221a;
+  --card2:#202820;
+  --border:#2a382a;
+  --border2:#3a4e3a;
+  --green:#4ade80;
+  --green2:#22c55e;
+  --green-dim:#1a4a2a;
+  --amber:#fbbf24;
+  --amber-dim:#3a2a00;
+  --red:#f87171;
+  --red-dim:#3a1010;
+  --blue:#60a5fa;
+  --blue-dim:#0f2a4a;
+  --violet:#a78bfa;
+  --text:#e8f0e8;
+  --text2:#8fa88f;
+  --text3:#5a705a;
+  --font-head:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --r:12px;
+  --r2:8px;
+  --nav-h:60px;
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:calc(var(--nav-h) + var(--safe-bottom) + 20px);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Sections ── */
+.section{display:none;animation:fadeIn .25s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── Top bar ── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,15,10,.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px 10px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar-title{font-family:var(--font-head);font-size:22px;letter-spacing:1px;color:var(--green)}
+.race-toggle{
+  display:flex;gap:4px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:3px;
+}
+.race-btn{
+  padding:4px 12px;border-radius:16px;border:none;
+  font-family:var(--font-body);font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .2s;
+  background:transparent;color:var(--text2);
+}
+.race-btn.active{background:var(--green);color:#0a0f0a}
+
+/* ── Bottom Nav ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:rgba(10,15,10,.96);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:var(--safe-bottom);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:10px 4px 8px;cursor:pointer;
+  border:none;background:transparent;color:var(--text3);
+  font-family:var(--font-body);font-size:10px;font-weight:400;
+  transition:color .2s;gap:4px;
+}
+.nav-item.active{color:var(--green)}
+.nav-icon{font-size:20px;line-height:1}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px #4ade8080)}
+
+/* ── Page headers ── */
+.page-header{padding:20px 16px 12px}
+.page-label{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.page-title{font-family:var(--font-head);font-size:36px;letter-spacing:1px;line-height:1;color:var(--text)}
+.page-subtitle{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.5}
+
+/* ── Cards ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.card+.card{margin-top:8px}
+.card-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.card-body{display:none;padding:12px 14px;border-top:1px solid var(--border)}
+.card-body.open{display:block}
+
+/* ── Badges ── */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:2px 8px;border-radius:20px;
+  font-size:11px;font-weight:500;
+}
+.badge-green{background:var(--green-dim);color:var(--green)}
+.badge-amber{background:var(--amber-dim);color:var(--amber)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-blue{background:var(--blue-dim);color:var(--blue)}
+.badge-violet{background:#2a1a4a;color:var(--violet)}
+.badge-gray{background:var(--bg3);color:var(--text2)}
+
+/* ── Pill row ── */
+.pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+
+/* ── Stat row ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:12px 16px}
+.stat-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r2);padding:10px;text-align:center;
+}
+.stat-val{font-family:var(--font-head);font-size:22px;color:var(--green);letter-spacing:.5px}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Phase tabs ── */
+.phase-tabs{
+  display:flex;gap:0;overflow-x:auto;
+  padding:0 16px;margin-bottom:12px;
+  scrollbar-width:none;
+}
+.phase-tabs::-webkit-scrollbar{display:none}
+.phase-tab{
+  flex-shrink:0;padding:8px 16px;
+  border:1px solid var(--border);
+  font-family:var(--font-body);font-size:12px;font-weight:500;
+  cursor:pointer;background:var(--bg2);color:var(--text2);
+  transition:all .2s;white-space:nowrap;
+}
+.phase-tab:first-child{border-radius:var(--r2) 0 0 var(--r2)}
+.phase-tab:last-child{border-radius:0 var(--r2) var(--r2) 0}
+.phase-tab+.phase-tab{border-left:none}
+.phase-tab.active{background:var(--green);color:#0a0f0a;border-color:var(--green)}
+
+/* ── Week cards ── */
+.week-card{
+  margin:0 16px 8px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.week-head{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.week-num{
+  font-family:var(--font-head);font-size:20px;color:var(--text3);
+  line-height:1;min-width:28px;
+}
+.week-info{flex:1}
+.week-title{font-size:13px;font-weight:500;color:var(--text)}
+.week-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.week-badges{display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.week-body{display:none;border-top:1px solid var(--border)}
+.week-body.open{display:block}
+.session{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+}
+.session:last-child{border-bottom:none}
+.session-day{
+  width:4px;flex-shrink:0;
+}
+.session-content{flex:1;padding:10px 12px}
+.session-header{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.day-label{
+  font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  padding:2px 7px;border-radius:20px;
+}
+.d-lun{background:#0f2a4a;color:var(--blue)}
+.d-mer{background:var(--green-dim);color:var(--green)}
+.d-ven{background:var(--amber-dim);color:var(--amber)}
+.d-dim{background:var(--red-dim);color:var(--red)}
+.d-sam{background:var(--red-dim);color:var(--red)}
+.type-label{font-size:10px;color:var(--text3);font-style:italic}
+.session-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px}
+.session-detail{font-size:11px;color:var(--text2);line-height:1.6}
+.expert-tip{
+  font-size:10.5px;line-height:1.5;margin-top:4px;
+  display:flex;gap:5px;
+}
+.tip-who{font-weight:500;flex-shrink:0}
+.tip-c{color:var(--blue)}
+.tip-k{color:var(--green)}
+.tip-d{color:var(--amber)}
+
+/* ── Exercises ── */
+.ex-grid{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.ex-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.ex-head{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+}
+.ex-code{
+  font-family:var(--font-head);font-size:20px;
+  line-height:1;min-width:32px;
+}
+.ex-info{flex:1}
+.ex-name{font-size:13px;font-weight:500;color:var(--text)}
+.ex-cat{font-size:11px;color:var(--text3);margin-top:1px}
+.ex-body{display:none;border-top:1px solid var(--border);padding:12px 14px}
+.ex-body.open{display:block}
+.ex-section{font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:10px 0 6px}
+.ex-section:first-child{margin-top:0}
+.why-box{
+  background:var(--bg3);border-radius:var(--r2);padding:10px;
+  font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;
+}
+.step-row{display:flex;gap:8px;margin-bottom:6px;align-items:flex-start}
+.step-num{
+  width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:600;flex-shrink:0;margin-top:1px;
+  background:var(--green-dim);color:var(--green);
+}
+.step-txt{font-size:12px;color:var(--text2);line-height:1.5;flex:1}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info-box{background:var(--bg3);border-radius:var(--r2);padding:8px}
+.info-box-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.info-box-val{font-size:11px;color:var(--text2);line-height:1.5}
+.err-item{display:flex;gap:6px;margin-bottom:4px}
+.err-x{color:var(--red);font-size:12px;flex-shrink:0}
+.prog-bar{background:var(--bg3);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:11px;color:var(--text2)}
+
+/* ── Prevention ── */
+.prev-grid{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.alert-card{border-radius:var(--r);overflow:hidden;border:1px solid}
+.alert-head{padding:10px 14px;display:flex;align-items:center;gap:8px}
+.alert-level{
+  font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:2px 8px;border-radius:20px;
+}
+.alert-title{font-size:13px;font-weight:500}
+.alert-body{padding:10px 14px;font-size:12px;line-height:1.6}
+.alert-action{
+  display:flex;gap:6px;margin-top:4px;align-items:flex-start;
+}
+.alert-arrow{flex-shrink:0;font-size:12px;margin-top:2px}
+.a-green{border-color:var(--green-dim);background:rgba(74,222,128,.04)}
+.a-green .alert-head{background:var(--green-dim)}
+.a-green .alert-level{background:rgba(74,222,128,.2);color:var(--green)}
+.a-green .alert-title{color:var(--green)}
+.a-green .alert-arrow{color:var(--green)}
+.a-amber{border-color:var(--amber-dim);background:rgba(251,191,36,.04)}
+.a-amber .alert-head{background:var(--amber-dim)}
+.a-amber .alert-level{background:rgba(251,191,36,.2);color:var(--amber)}
+.a-amber .alert-title{color:var(--amber)}
+.a-amber .alert-arrow{color:var(--amber)}
+.a-red{border-color:var(--red-dim);background:rgba(248,113,113,.04)}
+.a-red .alert-head{background:var(--red-dim)}
+.a-red .alert-level{background:rgba(248,113,113,.2);color:var(--red)}
+.a-red .alert-title{color:var(--red)}
+.a-red .alert-arrow{color:var(--red)}
+
+/* ── Parcours ── */
+.route-grid{padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.route-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;
+}
+.route-band{height:4px}
+.route-content{padding:12px 14px}
+.route-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.route-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.3}
+.route-phase{font-size:10px;color:var(--text3);margin-top:2px}
+.route-stats{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.route-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:8px}
+.route-tips{display:flex;flex-direction:column;gap:4px}
+.route-tip{font-size:11px;color:var(--text3);display:flex;gap:5px}
+.route-tip span:first-child{flex-shrink:0;color:var(--green)}
+
+/* ── Home ── */
+.home-hero{
+  margin:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:20px;
+  position:relative;overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;opacity:.04;
+  background:radial-gradient(circle at 30% 50%, var(--green) 0%, transparent 70%);
+}
+.hero-race{
+  font-family:var(--font-head);
+  font-size:48px;letter-spacing:2px;line-height:1;
+  color:var(--green);position:relative;
+}
+.hero-sub{font-size:13px;color:var(--text2);margin:4px 0 16px;position:relative;line-height:1.5}
+.hero-dates{font-size:11px;color:var(--text3);position:relative}
+.progress-section{margin:0 16px 16px}
+.progress-title{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.progress-weeks{display:flex;gap:3px;flex-wrap:wrap}
+.prog-w{
+  width:14px;height:14px;border-radius:3px;
+  background:var(--bg3);border:1px solid var(--border);
+}
+.prog-w.phase1{background:#0f2a4a;border-color:#1a4a7a}
+.prog-w.phase2{background:var(--green-dim);border-color:#2a5a3a}
+.prog-w.phase3{background:var(--amber-dim);border-color:#5a4000}
+.prog-w.phase4{background:var(--red-dim);border-color:#5a2020}
+.prog-w.choc{border:2px solid var(--red) !important;background:var(--red-dim)}
+.legend-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3)}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.quick-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 16px 16px}
+.quick-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px;cursor:pointer;
+  transition:border-color .2s;
+}
+.quick-card:active{border-color:var(--green)}
+.qc-icon{font-size:24px;margin-bottom:8px}
+.qc-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.qc-sub{font-size:11px;color:var(--text3)}
+
+/* ── Responsive ── */
+@media(min-width:640px){
+  body{max-width:760px;margin:0 auto;padding-bottom:80px}
+  .bottom-nav{max-width:760px;left:50%;transform:translateX(-50%)}
+  .quick-cards{grid-template-columns:repeat(4,1fr)}
+  .stats-row{grid-template-columns:repeat(6,1fr)}
+  .ex-body{display:none}
+  .ex-body.open{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+}
+
+/* ── Divider ── */
+.divider{height:1px;background:var(--border);margin:10px 0}
+.section-header{padding:16px 16px 4px;display:flex;align-items:center;gap:8px}
+.section-header-title{font-family:var(--font-head);font-size:20px;letter-spacing:.5px;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-title">TRAIL PLAN</div>
+  <div class="race-toggle">
+    <button class="race-btn active" id="btn-utopic" onclick="setRace('utopic')">UTOPIC</button>
+    <button class="race-btn" id="btn-utmj" onclick="setRace('utmj')">UTMJ</button>
+  </div>
+</div>
+
+<!-- SECTIONS -->
+<div id="s-home" class="section active">
+  <div class="page-header">
+    <div class="page-label">Programme actif</div>
+    <div class="page-title" id="home-title">L'UTOPIC</div>
+    <div class="page-subtitle" id="home-sub">82 km · 5000 D+ · 5 boucles · 12 juillet 2026</div>
+  </div>
+
+  <div class="home-hero">
+    <div class="hero-bg"></div>
+    <div class="hero-race" id="hero-race">UTOPIC</div>
+    <div class="hero-sub" id="hero-sub">82 km / 5000 D+ · Départ 5h00 avec frontale · Saint-Claude (Jura)</div>
+    <div class="hero-dates" id="hero-dates">Dimanche 12 juillet 2026 · ITRA 4 · Finisseur objectif</div>
+  </div>
+
+  <div class="stats-row" id="home-stats">
+    <div class="stat-box"><div class="stat-val">16</div><div class="stat-lbl">Semaines</div></div>
+    <div class="stat-box"><div class="stat-val">4</div><div class="stat-lbl">Phases</div></div>
+    <div class="stat-box"><div class="stat-val">2</div><div class="stat-lbl">WE choc</div></div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-title">Progression — 16 semaines</div>
+    <div class="progress-weeks" id="prog-weeks"></div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="background:#0f2a4a"></div>Fondation</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1a4a2a"></div>Construction</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a2a00"></div>Spécifique</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3a1010"></div>Affûtage</div>
+      <div class="legend-item"><div class="legend-dot" style="border:2px solid #f87171;background:#3a1010"></div>WE choc</div>
+    </div>
+  </div>
+
+  <div class="section-header"><div class="section-header-title">Accès rapide</div></div>
+  <div class="quick-cards">
+    <div class="quick-card" onclick="goTo('plan')">
+      <div class="qc-icon">📅</div>
+      <div class="qc-title">Plan 16 semaines</div>
+      <div class="qc-sub">Toutes les séances</div>
+    </div>
+    <div class="quick-card" onclick="goTo('exercices')">
+      <div class="qc-icon">💪</div>
+      <div class="qc-title">Exercices renfo</div>
+      <div class="qc-sub">12 fiches détaillées</div>
+    </div>
+    <div class="quick-card" onclick="goTo('prevention')">
+      <div class="qc-icon">🩺</div>
+      <div class="qc-title">Prévention</div>
+      <div class="qc-sub">Signaux d'alarme</div>
+    </div>
+    <div class="quick-card" onclick="goTo('parcours')">
+      <div class="qc-icon">🗺️</div>
+      <div class="qc-title">Parcours</div>
+      <div class="qc-sub">Haut-Doubs</div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN -->
+<div id="s-plan" class="section">
+  <div class="page-header">
+    <div class="page-label">Plan d'entraînement</div>
+    <div class="page-title">16 SEMAINES</div>
+    <div class="page-subtitle" id="plan-sub">UTOPIC · 82 km / 5000 D+ · 12 juillet 2026</div>
+  </div>
+  <div class="phase-tabs" id="phase-tabs"></div>
+  <div id="weeks-container"></div>
+</div>
+
+<!-- EXERCICES -->
+<div id="s-exercices" class="section">
+  <div class="page-header">
+    <div class="page-label">Guide des exercices</div>
+    <div class="page-title">RENFORCEMENT</div>
+    <div class="page-subtitle">12 exercices · Fiches détaillées · Codes A1→C5</div>
+  </div>
+  <div class="section-header"><div class="section-header-title">A · Jambes</div></div>
+  <div class="ex-grid" id="ex-A"></div>
+  <div class="section-header"><div class="section-header-title">B · Gainage</div></div>
+  <div class="ex-grid" id="ex-B"></div>
+  <div class="section-header"><div class="section-header-title">C · Fonctionnel trail</div></div>
+  <div class="ex-grid" id="ex-C"></div>
+</div>
+
+<!-- PREVENTION -->
+<div id="s-prevention" class="section">
+  <div class="page-header">
+    <div class="page-label">Protocoles santé</div>
+    <div class="page-title">PRÉVENTION</div>
+    <div class="page-subtitle">Signaux d'alarme · Semaines ratées · Nutrition · Matériel</div>
+  </div>
+  <div id="prev-content"></div>
+</div>
+
+<!-- PARCOURS -->
+<div id="s-parcours" class="section">
+  <div class="page-header">
+    <div class="page-label">Itinéraires Haut-Doubs</div>
+    <div class="page-title">PARCOURS</div>
+    <div class="page-subtitle">Montperreux · Métabief · Jougne · Lac de Saint-Point</div>
+  </div>
+  <div id="parcours-content"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="goTo('home')">
+    <span class="nav-icon">⛰</span>Home
+  </button>
+  <button class="nav-item" id="nav-plan" onclick="goTo('plan')">
+    <span class="nav-icon">📅</span>Plan
+  </button>
+  <button class="nav-item" id="nav-exercices" onclick="goTo('exercices')">
+    <span class="nav-icon">💪</span>Renfo
+  </button>
+  <button class="nav-item" id="nav-prevention" onclick="goTo('prevention')">
+    <span class="nav-icon">🩺</span>Santé
+  </button>
+  <button class="nav-item" id="nav-parcours" onclick="goTo('parcours')">
+    <span class="nav-icon">🗺</span>Parcours
+  </button>
+</nav>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+
+const RACES = {
+  utopic: {
+    name:"L'UTOPIC",short:"UTOPIC",km:"82",dp:"5000",
+    detail:"82 km · 5000 D+ · 5 boucles · Départ 5h00 avec frontale · Saint-Claude (Jura)",
+    date:"Dimanche 12 juillet 2026 · ITRA 4 · Finisseur objectif",
+    planSub:"UTOPIC · 82 km / 5000 D+ · 12 juillet 2026",
+  },
+  utmj: {
+    name:"UTMJ",short:"UTMJ",km:"70",dp:"3000",
+    detail:"70 km · 3000 D+ · Objectif finisseur en moins de 10h",
+    date:"Octobre 2026",
+    planSub:"UTMJ · 70 km / 3000 D+ · Octobre 2026",
+  }
+};
+
+let currentRace = 'utopic';
+let currentPhase = 0;
+let openWeeks = {};
+let openEx = {};
+
+/* ═══════════════════════════════════════════════════════════
+   PLAN DATA
+═══════════════════════════════════════════════════════════ */
+const PHASES_UTOPIC = [
+  {name:"Phase 1",label:"Fondation",sem:"S1–S4",col:"#1A5FA8",
+   desc:"Base aérobique + introduction côtes longues. Montperreux en semaine, Lac de Saint-Point le dimanche.",
+   semaines:[
+    {n:1,km:42,dp:720,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance dénivelé douce",
+       detail:"50 min Z1-Z2, chercher 120-150 D+. FC < 145.",
+       tips:[["C","Intégrer D+ dès S1 pour habituer les tendons verticalement."],["K","Après : 3×15 excentriques Achille sur marche."],["D","Objectif S1 : 42 km / 720 D+. Ratio 17 m/km → cible 35 m/km."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo socle + footing",
+       detail:"RENFO 20 min : Planche B1 3×45s · Pont fessier B2 3×15 · Squat bulgare A1 3×12 descente 3s · Relevé nordique A2 3×8. Puis 30 min Z1.",
+       tips:[["C","Renfo AVANT le footing — muscles frais pour la force."],["K","Relevé nordique dès S1 : prévention ischio pour 5000 D+."],["D","Mercredi = 0 D+ ciblé."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes longues — initiation",
+       detail:"Échauffement 15 min · 5× montée 3 min Z3 (FC 148-155) · récup descente marchée · retour 10 min. Total ~52 min / D+240.",
+       tips:[["C","Trouver une côte de 200-300 D+ autour de Montperreux. La même chaque vendredi."],["K","Jamais Z4 cette semaine. Tendons en adaptation."],["D","D+ vendredi = 33% du D+ hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Tour Lac de Saint-Point",
+       detail:"14-15 km, D+300. Parking Malbuisson (15 min). Coteaux est + tour nord du lac. Allure conversation.",
+       tips:[["C","300 D+ dès S1 — nécessaire pour cible 5000 D+."],["K","Retour au calme 10 min marche obligatoire."],["D","S1 : 42 km / 720 D+."]]},
+    ]},
+    {n:2,km:47,dp:870,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance D+ modéré",detail:"55 min Z1-Z2, D+180. Terrain vallonné Montperreux.",tips:[["C","Même allure que S1 + un peu plus de D+."],["D","+21% D+ vs S1 — surveiller."],["K","Rouleau mousse mollets + bandelette 10 min."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo jambes + intermittent",detail:"RENFO 20 min : Monte-escalier C1 3×12 · Talon excentrique A3 3×20 · Équilibre unipodal C2 2×30s · Ciseaux du tronc B3 3×10. Puis 38 min : 5×2 min Z3 / 2 min Z1.",tips:[["C","Monte-escalier : test du moyen fessier."],["K","Talon excentrique : talon SOUS la marche obligatoirement."],["D","Double stimulus renfo + intermittent."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes longues — progression",detail:"15 min · 6× montée 3 min Z3 · récup marche · retour. D+285.",tips:[["C","1 répétition de plus vs S1."],["K","Gêne genou → 5 répétitions."],["D","D+ vendredi : 285 m = 33% du D+ hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Tour Lac Saint-Point étendu",detail:"1h45, 15 km, D+420. Malbuisson. Bâtons conseillés.",tips:[["C","420 D+ S2 — montée progressive nécessaire."],["K","Bilan pieds post-sortie."],["D","Ratio 18.5 m/km."]]},
+    ]},
+    {n:3,km:50,dp:1020,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance Z2 avec D+",detail:"60 min Z2, D+230. Terrain montagneux si possible.",tips:[["C","S3 : les sensations s'améliorent."],["D","+17% D+ vs S2."],["K","Excentrique Achille 3×15 après."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo tronc + tempo doux",detail:"RENFO 20 min : Gainage latéral B4 3×30s · Ciseaux du tronc B3 3×10 · Pont fessier unilateral 3×12 · Fentes avant C3 3×12. Puis 42 min : 2×10 min Z3.",tips:[["C","Pont fessier unilateral : chaque fessier séparément."],["K","Gainage latéral : hanche qui s'affaisse = stop."],["D","Début du tempo Z3 ce mercredi."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes longues — consolidation",detail:"15 min · 6× montée 4 min Z3 · récup marche · retour. D+340.",tips:[["C","Durée 3→4 min. Pas l'intensité — règle phase 1."],["K","Genoux chauds → glaçage 10 min."],["D","Ratio D+/km : 20 m/km → cible 35 m/km."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Tour Lac Saint-Point + coteaux",detail:"2h, 17-18 km, D+570. 1 gel à 1h. Bâtons.",tips:[["C","570 D+ dès S3 — nécessaire pour 5000 D+."],["K","Douleur > 3/10 : consulter."],["D","S3 : 50 km / 1020 D+."]]},
+    ]},
+    {n:4,km:36,dp:560,recup:true,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération active",detail:"30 min Z1. D+ minimal.",tips:[["C","Résister à l'envie d'en faire plus."],["K","Automassage 15 min. Sommeil prioritaire."],["D","S4 récup : -45% D+."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo léger maintien",detail:"RENFO LÉGER 15 min : Planche B1 3×30s · Pont fessier B2 3×15 · Talon excentrique A3 2×15 · Équilibre C2 2×20s. Puis footing 22 min Z1.",tips:[["C","Renfo en maintien uniquement."],["K","Pas de squat bulgare ni relevé nordique cette semaine."],["D","Maintien des adaptations sans fatigue."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes légères récup",detail:"10 min · 4× montée 3 min Z2-Z3 · marche. D+170.",tips:[["C","Volume et intensité réduits même sur les côtes."],["K","Bilan tendineux : Achille, rotule, bandelette."],["D","D+ vendredi : 170 m. -50% vs S3."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Sortie facile récup",detail:"1h10, 10-11 km, D+200. Plaisir.",tips:[["C","Bilan phase 1 : sensations ? Tendons ?"],["K","Corps frais = bonne adaptation."],["D","Ratio charge aiguë/chronique : 0.78."]]},
+    ]},
+  ]},
+  {name:"Phase 2",label:"Construction",sem:"S5–S10",col:"#1E7A3A",
+   desc:"Introduction VMA + côtes longues. Métabief le dimanche dès S5. D+ hebdo progresse vers 1700 m. WE Choc 1 en S9.",
+   semaines:[
+    {n:5,km:50,dp:1060,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance D+ soutenu",detail:"60 min Z2, D+250. Terrain trail Montperreux, montées marchées > 12%.",tips:[["C","Reprise après récup S4. Même volume que S3."],["D","Calé sur S3 en réalité."],["K","Excentrique Achille 3×15 après."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Seuil",titre:"Renfo complet + premier seuil",detail:"RENFO 20 min : Squat bulgare A1 3×12 3s descente · Relevé nordique A2 3×8 · Talon excentrique A3 3×20. Puis seuil 50 min : 2×10 min Z4 (FC 158-168), récup 4 min Z1.",tips:[["C","Premier seuil. 2×10 min = 20 min cumulés Z4."],["K","Squat bulgare : descente 3s obligatoire."],["D","Double stimulus renfo + seuil."]]},
+      {j:"Vendredi",dl:"d-ven",type:"VMA",titre:"Côtes explosives — initiation",detail:"15 min · 8× montée 45s Z5 · récup descente marchée (2 min min) · retour. D+280.",tips:[["C","Effort maximal sur 45s. Vraie récup entre chaque."],["K","Jamais 2 séances explosives consécutives si longue > 2h30."],["D","D+ vendredi : 280 m = 26% hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Circuit Mont d'Or — Métabief (Circuit 19)",detail:"15 km, D+600. Métabief (20 min). GR5 → Morond → crêtes Mont d'Or → retour. tracedetrail.fr/fr/trace/231912",tips:[["C","D+ dimanche 600 m : première vraie dose montagne."],["K","Marcher TOUTES les montées la 1ère heure."],["D","15 km / 600 D+ = 40 m/km. Au-dessus de ton ratio habituel."]]},
+    ]},
+    {n:6,km:54,dp:1180,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération active D+",detail:"52 min Z1, D+220.",tips:[["K","Rouleau mousse bandelette + mollets 15 min."],["D","+11% D+ vs S5."],["C","Pas de tentation d'aller vite."]]},
+      {j:"Mercredi",dl:"d-mer",type:"VMA",titre:"Renfo jambes + VO2max",detail:"RENFO 20 min : Monte-escalier C1 chargé 3×12 haltères 2×5 kg · Fentes latérales 3×12 · Gainage latéral B4 3×30s · Planche B1 3×45s. Puis VO2max 55 min : 6×3 min Z5, récup 2 min Z1.",tips:[["C","6×3 min Z5 construisent le moteur aérobique."],["K","Monte-escalier chargé : hanche qui ne s'incline pas."],["D","18 min de travail au-dessus VO2max."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes longues — retour",detail:"15 min · 5× montée 5 min Z3-Z4 · récup marche · retour. D+380.",tips:[["C","Alternance S5 explosif → S6 long. Fixe jusqu'à S13."],["K","5 min en montée = vraie côte de trail."],["D","D+ vendredi : 380 m = 32% hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Circuit Mont d'Or + extension",detail:"2h25, 22 km, D+700. Métabief. Bâtons + gel + barre.",tips:[["C","700 D+ : vraie dose montagne."],["K","Bilan pieds après."],["D","22 km / 700 D+ = 32 m/km."]]},
+    ]},
+    {n:7,km:58,dp:1340,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance D+ soutenu",detail:"65 min Z2, D+300. Montperreux terrain trail.",tips:[["C","Volume et dénivelé en hausse."],["D","+13% D+ vs S6."],["K","Excentrique Achille systématique."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Seuil",titre:"Renfo avancé + seuil",detail:"RENFO 20 min : Squat unipodal assiste C5 3×8 avec sangle · Monte-escalier C1 3×15 haltères 2×5 kg · Gainage lateral B4 3×30s · Planche B1 3×1 min. Puis seuil 55 min : 3×10 min Z4, récup 3 min Z1.",tips:[["C","Squat unipodal : première session. Aide importante."],["K","3×10 min Z4 = 30 min cumulés seuil."],["D","Seuil : +50% vs S5."]]},
+      {j:"Vendredi",dl:"d-ven",type:"VMA + Côtes",titre:"Côtes mixte — première",detail:"15 min · 5×45s Z5 · 5 min récup · 3×4 min Z4 · récup marche. D+400.",tips:[["C","Mixte : explosif d'abord, puis endurance côtes."],["K","Gêne rotule → supprimer les 45s."],["D","D+ vendredi : 400 m = 30% hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Circuit crêtes Mont d'Or étendu (Circuit 20)",detail:"2h45, 23 km, D+800. Métabief. Passage côté suisse. tracedetrail.fr/fr/trace/231913",tips:[["C","800 D+ : simulation 1 boucle UTOPIC."],["K","Ne pas courir les descentes des crêtes — technique."],["D","23 km / 800 D+ = 35 m/km."]]},
+    ]},
+    {n:8,km:40,dp:640,recup:true,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération totale",detail:"30 min Z1, D+ minimal.",tips:[["C","Récup avant WE choc S9."],["K","Automassage 20 min. Kiné si gêne."],["D","S8 récup : -52% D+."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo maintien léger",detail:"RENFO LÉGER 20 min : Planche B1 3×40s · Pont fessier B2 3×15 · Talon excentrique A3 2×15 · Équilibre C2 2×25s yeux fermés. Puis footing 22 min Z1.",tips:[["C","Récup : renfo en maintien. Pas de nouveau stimulus."],["K","Pas de squat bulgare ni relevé nordique."],["D","Maintien sans fatigue supplémentaire."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes légères — pré-choc",detail:"10 min · 5× montée 3 min Z2-Z3 · marche. D+220.",tips:[["C","Pré-choc : côtes longues, pas d'explosif."],["K","Tout doit aller avant S9."],["D","D+ vendredi : 220 m. Préservation."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Sortie courte récup",detail:"1h15, 11-12 km, D+230.",tips:[["C","Corps frais pour le WE choc S9."],["K","Bilan tendineux complet."],["D","Ratio charge aiguë/chronique : 0.80."]]},
+    ]},
+    {n:9,km:95,dp:2100,recup:false,choc:true,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance début semaine choc",detail:"65 min Z2, D+300. Pas de renfo excentrique cette semaine.",tips:[["C","Début semaine choc. Volume normal, préservation."],["D","Calé sur S7."],["K","IMPORTANT : pas de relevé nordique ni squat bulgare cette semaine."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Activation",titre:"Activation légère pré-choc",detail:"RENFO LÉGER 15 min (maintien) : Planche B1 3×40s · Pont fessier B2 3×12 · Équilibre C2 2×25s. Puis 45 min Z2 terrain plat. Pas de seuil.",tips:[["C","Pas de seuil ce mercredi."],["K","Renfo léger uniquement. Aucun excentrique."],["D","Toute la charge est sur le WE."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Activation",titre:"Activation douce pré-choc",detail:"10 min · 3× montée 3 min Z2 · marche. D+130.",tips:[["C","Activer les fibres sans dépenser."],["K","Masser mollets et quadriceps le soir."],["D","D+ minimal. Tout pour le WE."]]},
+      {j:"Samedi",dl:"d-sam",type:"WE Choc 1",titre:"⚡ WE CHOC 1 — Sam : 28 km / 1000 D+",detail:"Départ 5h-6h avec frontale (UTOPIC). 28 km / 1000 D+. FC < 152. Marcher > 10%. Bâtons dès le départ. Nutrition : 1 gel/40 min · 500 ml/h · 1 barre 1h30. Métabief — Circuit crêtes + Mont Ramey.",tips:[["C","Résister à la tentation d'aller vite. Corps frais pour demain."],["K","Matériel nocturne : frontale suffisante ? Gilet ajusté ?"],["D","28 km / 1000 D+ = 35.7 m/km. Au-dessus de ton ratio habituel."]]},
+      {j:"Dimanche",dl:"d-dim",type:"WE Choc 1",titre:"⚡ WE CHOC 1 — Dim : 38 km / 1300 D+",detail:"38 km / 1300 D+. Jougne. Jambes lourdes : c'est l'objectif. Marcher > 8%. Ravitaillement à la voiture à 20 km. Total WE : 66 km / 2300 D+ = 80% de l'UTOPIC.",tips:[["C","Les 10 premiers km difficiles : normal."],["K","Douleur > 3/10 après 20 km : rentrer."],["D","66 km / 2300 D+ = 80% de l'UTOPIC en 2 jours."]]},
+    ]},
+    {n:10,km:55,dp:1200,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération active post-choc",detail:"40 min Z1. Terrain plat.",tips:[["C","Récup obligatoire. Ne rien forcer."],["K","Bain froid si pas fait dimanche."],["D","S10 = dechargement -20% post-choc."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Seuil",titre:"Renfo complet + seuil long",detail:"RENFO 20 min : Relevé nordique A2 3×10 · Squat bulgare A1 3×12 3s descente · Fentes sautées C4 3×10 · Gainage latéral B4 3×30s. Puis seuil 62 min : 4×10 min Z4, récup 3 min Z1.",tips:[["C","40 min cumulés Z4 = allure roulante UTOPIC."],["K","Fentes sautées : seulement si jambes récupérées du WE."],["D","40 min Z4 = record du plan jusqu'ici."]]},
+      {j:"Vendredi",dl:"d-ven",type:"VMA + Côtes",titre:"Côtes mixte — reprise",detail:"15 min · 6×45s Z5 · 5 min récup · 4×5 min Z4 · récup marche. D+520.",tips:[["C","Corps rechargé après récup du WE choc."],["K","Douleur > 3/10 : arrêter."],["D","D+ vendredi : 520 m = 43% hebdo."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Sortie longue clé — 1000 D+",detail:"3h10, 27 km, D+1000. Métabief circuit étendu. Ravitaillement toutes les 45 min.",tips:[["C","1000 D+ : simulation boucle du Crêt Pourri UTOPIC."],["K","Bilan 48h après : > 3/10 quelque part ? Réduire S11."],["D","27 km / 1000 D+ = 37 m/km."]]},
+    ]},
+  ]},
+  {name:"Phase 3",label:"Spécifique",sem:"S11–S14",col:"#9A5A00",
+   desc:"Pic de charge maximal. Jougne le dimanche. Vendredi atteint 700-850 D+. WE Choc 2 en S12.",
+   semaines:[
+    {n:11,km:63,dp:1400,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance D+ soutenu",detail:"65 min Z2, D+320. Montperreux.",tips:[["C","Début phase spécifique. Sensations meilleures qu'en S5."],["D","Reprise 1400 D+ — identique à S7."],["K","Excentrique Achille systématique."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Seuil",titre:"Renfo force + tempo",detail:"RENFO 20 min : Squat bulgare A1 3×12 haltères 2×8 kg 3s descente · Relevé nordique A2 3×10 · Fentes sautées C4 3×10 · Gainage latéral B4 3×30s. Puis tempo 62 min : 3×12 min Z4, récup 3 min Z1.",tips:[["C","Tempo le plus long du plan. Allure roulante UTOPIC."],["K","Squat bulgare avec charge : 2×8 kg si pas de douleur."],["D","36 min cumulés Z4."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes longues spécifiques UTOPIC",detail:"15 min · 4× montée 9 min Z3-Z4 (simulation côtes UTOPIC) · récup marche complète. D+580.",tips:[["C","9 min en montée = simulation côtes Mont Bayard UTOPIC."],["K","Bâtons obligatoires. Alterner marche nordique."],["D","Côtes longues car dimanche = 3h30. Pas d'explosif à J-2."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Boucle Jougne — 1000 D+",detail:"3h30, 28-30 km, D+1000. Jougne (30 min). Tour Jougne / crêtes. Gel + barre toutes les 45 min.",tips:[["C","Tester exactement ce que tu prendras en course."],["K","Retour au calme 15 min. Nutrition récup dans l'heure."],["D","28 km / 1000 D+ = 35 m/km."]]},
+    ]},
+    {n:12,km:100,dp:2800,recup:false,choc:true,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Endurance début WE choc 2",detail:"55 min Z1, D+250. Pas de renfo excentrique cette semaine.",tips:[["C","Semaine choc 2 : préservation maximale."],["K","Pas de relevé nordique ni squat bulgare."],["D","Toute la charge = WE choc 2."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Activation",titre:"Activation légère pré-choc 2",detail:"RENFO LÉGER 15 min : Planche B1 3×45s · Pont fessier B2 3×12 · Équilibre C2 2×30s. Puis 45 min Z2 terrain plat.",tips:[["C","Pas de seuil. Corps en réserve."],["K","Renfo léger uniquement."],["D","Volume minimal."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Activation",titre:"Activation minimale pré-choc 2",detail:"10 min marche + 3× montée 3 min Z2 · marche. D+130.",tips:[["C","Activer les fibres, pas les fatiguer."],["K","Masser mollets et quadriceps. Coucher avant 22h."],["D","D+ symbolique."]]},
+      {j:"Samedi",dl:"d-sam",type:"WE Choc 2",titre:"⚡ WE CHOC 2 — Sam : 32 km / 1300 D+",detail:"Départ EXACTEMENT à 5h00 avec frontale (heure UTOPIC). 32 km / 1300 D+. Jougne. Matériel de course complet. Protocole nutritionnel identique à la course.",tips:[["C","5h00 exact : entrainer le tube digestif et le réveil."],["K","Test matériel nocturne complet."],["D","32 km / 1300 D+ = 40.6 m/km."]]},
+      {j:"Dimanche",dl:"d-dim",type:"WE Choc 2",titre:"⚡ WE CHOC 2 — Dim : 42 km / 1600 D+",detail:"42 km / 1600 D+. LA SORTIE LA PLUS LONGUE DU PLAN. Jougne ou Métabief. Marcher > 8% systématiquement. Ravitaillement à 20 km ET 32 km. Total WE : 74 km / 2900 D+ = 90% UTOPIC.",tips:[["C","Au-delà de 32 km sur fatigue : avancer quoi qu'il arrive."],["K","Douleur > 4/10 : arrêter. L'UTOPIC est dans 4 semaines."],["D","74 km / 2900 D+ = 90% de l'UTOPIC."]]},
+    ]},
+    {n:13,km:60,dp:1520,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération active post-choc 2",detail:"40 min Z1. Terrain plat.",tips:[["C","Corps très fatigué. Ce lundi est sacré."],["K","Bain froid si pas fait dimanche."],["D","S13 = -20% volume post-choc."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Seuil",titre:"Renfo avancé + seuil",detail:"RENFO 20 min : Squat bulgare A1 3×12 haltères 2×8 kg · Relevé nordique A2 3×10 · Squat unipodal C5 3×8 aide minimale · Planche B1 3×1 min. Puis seuil 65 min : 4×10 min Z4 terrain trail.",tips:[["C","Dernière grande séance qualité."],["K","Squat unipodal : aide minimale maintenant."],["D","40 min Z4 = record du plan."]]},
+      {j:"Vendredi",dl:"d-ven",type:"VMA + Côtes",titre:"Côtes mixte — PIC ABSOLU",detail:"15 min · 6×45s Z5 · 5 min récup · 5×9 min Z3-Z4 · récup marche. D+850.",tips:[["C","850 D+ en séance dédiée. Le plus dur du plan."],["K","Si douleur > 3/10 : supprimer les 45s."],["D","D+ vendredi : 850 m = 42% hebdo. Record."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Sortie longue PIC — Jougne",detail:"4h15, 33-35 km, D+1400. Jougne. Conservateur en descente. Nutrition toutes les 45 min.",tips:[["C","35 km / 1400 D+ = simulation 2 boucles UTOPIC."],["K","48h récup quasi totale après. Alimentation +++."],["D","D+ hebdo : 2100 m. Ratio 28 m/km. Pic du plan."]]},
+    ]},
+    {n:14,km:45,dp:700,recup:true,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Récupération totale",detail:"Marche 30 min ou Z1 très lent.",tips:[["C","Corps en reconstruction. Aucune pression."],["K","Bilan corporel complet. Kiné si gêne."],["D","S14 : -67% D+. Supercompensation avant affûtage."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Renforcement",titre:"Renfo doux maintien",detail:"RENFO LÉGER 20 min : Planche B1 3×45s · Pont fessier B2 3×15 · Talon excentrique A3 2×15 · Équilibre C2 2×30s yeux fermés. Puis footing léger 22 min Z1.",tips:[["C","Renfo en maintien uniquement."],["K","Rien d'intense."],["D","Maintien sans fatigue."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes légères récup",detail:"10 min · 4× montée 3 min Z2-Z3 · marche. D+200.",tips:[["C","Côtes légères uniquement. Pas d'explosif."],["K","Dernier bilan musculotendineux."],["D","Signal minimal pour maintenir les adaptations."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Sortie facile",detail:"1h20, 12 km, D+300. Plaisir.",tips:[["C","Le gros du travail est fait."],["K","Corps frais = bon signe pour l'affûtage."],["D","Ratio : 0.72. Prêt pour l'affûtage."]]},
+    ]},
+  ]},
+  {name:"Phase 4",label:"Affûtage",sem:"S15–S16",col:"#C0392B",
+   desc:"Volume réduit à 35% du pic. Arrêt renforcement à J-10. Côtes en micro-doses. Corps frais sur la ligne.",
+   semaines:[
+    {n:15,km:28,dp:380,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Footing léger",detail:"30 min Z1, D+80.",tips:[["K","Dernière élévation de talon excentrique. Arrêt total renfo musculaire."],["D","-82% D+ vs pic S13."],["C","Corps en supercompensation active."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Activation",titre:"Micro-qualité",detail:"30 min + 3×2 min Z4. Garder les sensations.",tips:[["C","3 répétitions. Pas plus."],["K","Étirements myofasciaux doux 15 min le soir."],["D","6 min de travail seuil minimum pour maintenir les adaptations."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Côtes longues",titre:"Côtes légères affûtage",detail:"10 min · 3× montée 3 min Z2-Z3 · marche. D+150.",tips:[["C","3 côtes légères pour garder les filières actives."],["K","Vérif frontale : batterie chargée ? Bâtons : embouts OK ?"],["D","Minimum neuromusculaire."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Sortie longue",titre:"Dernier essai matériel avec frontale",detail:"1h, 9-10 km, D+220. Matériel course COMPLET avec frontale. Simuler départ 5h00.",tips:[["C","Dernier test avec frontale — simuler le départ UTOPIC."],["K","Hydratation ++ toute la semaine. Pas d'alcool."],["D","Corps en pleine surcompensation."]]},
+    ]},
+    {n:16,km:13,dp:130,recup:false,choc:false,seances:[
+      {j:"Lundi",dl:"d-lun",type:"Endurance",titre:"Trot très léger",detail:"20 min Z1.",tips:[["K","Massage pieds. Ongles courts. Préparer le matériel."],["D","J-6 : aucun nouveau stimulus."],["C","Le travail est terminé."]]},
+      {j:"Mercredi",dl:"d-mer",type:"Activation",titre:"Activation pré-course",detail:"15 min + 4×30s allure course.",tips:[["C","4 petites accélérations. C'est tout."],["K","Dîner glucides complexes. Rien de nouveau."],["D","J-4 : dernière stimulation des filières rapides."]]},
+      {j:"Vendredi",dl:"d-ven",type:"Activation",titre:"3 côtes d'activation",detail:"10 min marche + 3×30s allure course en côte. D+45.",tips:[["C","Activer les fessiers. Rien de plus."],["K","Taper blues normal à J-2. Confiance."],["D","J-2 : coucher avant 22h30."]]},
+      {j:"Dimanche",dl:"d-dim",type:"Course",titre:"🏔 UTOPIC — 82 km / 5000 D+ — Départ 5h00",detail:"5 boucles en solo. Départ avec frontale. Boucle 1 très conservative. Marcher TOUTES montées > 8%. Gel/barre toutes les 40 min. 500 ml/h. Bâtons dès le départ. Objectif : FINISSEUR.",tips:[["C","Boucle 1 à 5h du matin : commencer 30% plus lentement que ce que tu crois pouvoir tenir."],["K","Crampe : marche + sel + eau froide. Ne jamais s'arrêter brutalement."],["D","Barrière B4 à 18h30 : avec départ 5h, 13h30 pour 4 boucles = 3h22/boucle. Gérable."]]},
+    ]},
+  ]},
+];
+
+// UTMJ plan — phases identiques, ajustées D+
+const PHASES_UTMJ = JSON.parse(JSON.stringify(PHASES_UTOPIC)); // deep clone
+// Adjust for UTMJ
+PHASES_UTMJ[3].semaines[1].seances[3].titre = "🏔 UTMJ — 70 km / 3000 D+ — Objectif < 10h";
+PHASES_UTMJ[3].semaines[1].seances[3].detail = "Départ conservateur (6h45/km sur plat). Marcher toutes montées > 10%. Gel/barre toutes les 45 min. 500 ml/h. Bâtons dès le départ. Allure cible : plats 6h45/km + montées 4.5 km/h + descentes 7h/km = ~9h30.";
+PHASES_UTMJ[3].semaines[1].seances[3].tips = [["C","Les 25 premiers km sont pour les impatients. Les 45 derniers sont pour toi."],["K","Crampe : marche + sel + eau froide. Ne jamais s'arrêter brutalement."],["D","Allure cible : plats 6h45/km + montées 4.5 km/h = ~9h30."]];
+
+/* ═══════════════════════════════════════════════════════════
+   EXERCISES DATA
+═══════════════════════════════════════════════════════════ */
+const EXERCISES = [
+  {id:"A1",nom:"Squat bulgare excentrique",cat:"Renforcement jambes",col:"#1E7A3A",
+   phases:"Tout le plan (S1-S14)",dose:"3 × 12 reps · Descente 3 sec · 60s repos",
+   pourquoi:"Renforce les quadriceps et fessiers en mode excentrique — ce qui absorbe le choc en descente. Avec 5000 D+ de descente sur l'UTOPIC, c'est l'exercice le plus important.",
+   etapes:["Place le pied arrière sur un banc (hauteur genou).","Pied avant à 60-70 cm du banc.","Descends lentement sur 3 secondes, genou dans l'axe du 2e orteil.","Cuisse avant à l'horizontale (90°). Ne touche pas le sol avec le genou arrière.","Remonte en 1 seconde. Pousse sur le talon avant."],
+   erreurs:["Genou qui part en dedans","Tronc trop penché","Descente trop rapide"],
+   kine:"Si douleur rotulienne : réduire l'amplitude. Consulter si > 3/10.",
+   progressions:["S1-S4 : poids du corps","S5-S10 : haltères 2×5 kg","S11-S14 : haltères 2×8-10 kg"]},
+  {id:"A2",nom:"Relevé nordique",cat:"Renforcement jambes",col:"#1E7A3A",
+   phases:"Tout le plan (S1-S14)",dose:"3 × 8 reps · Descente ultra-lente · 90s repos",
+   pourquoi:"Prévention n°1 des déchirures ischio-jambiers (réduction prouvée de 51%). Crucial pour les descentes rapides en trail.",
+   etapes:["À genoux, chevilles bloquées sous un meuble lourd.","Corps droit, mains en avant pour parer la chute.","Laisse-toi tomber le plus lentement possible (3-5 secondes).","Amortis avec les mains, pousse pour revenir.","La descente contrôlée EST l'exercice."],
+   erreurs:["Fléchir les hanches pour tricher","Descente trop rapide","Ancrage insuffisant"],
+   kine:"Début : 3×5 reps. Courbatures ischio les 48h suivantes = normal. Ne pas faire la veille d'une sortie longue.",
+   progressions:["S1-S4 : 3×5 reps","S5-S10 : 3×8 reps","S11-S14 : 3×10 reps"]},
+  {id:"A3",nom:"Élévation de talon excentrique",cat:"Renforcement jambes",col:"#1E7A3A",
+   phases:"Tout le plan · APRÈS chaque séance",dose:"3 × 15-20 reps · Sur marche · Chaque pied",
+   pourquoi:"Protocole Alfredson : prévention tendinopathie achilléenne. Indispensable pour tout traileur.",
+   etapes:["Avant-pied sur le bord d'une marche.","Monte sur la pointe des deux pieds.","Lève un pied. Descends lentement sur 3 sec.","Talon SOUS le niveau de la marche.","Remonte avec les deux pieds."],
+   erreurs:["Descente trop rapide","Talon ne descend pas assez","Genoux fléchis"],
+   kine:"Douleur 1-2/10 : continuer. Douleur 3/10 : stop et repos 48h.",
+   progressions:["S1-S8 : 3×15 poids du corps","S9-S14 : 3×20 avec sac leste"]},
+  {id:"B1",nom:"Planche abdominale",cat:"Gainage et tronc",col:"#9A5A00",
+   phases:"Tout le plan (S1-S14)",dose:"3 × 45s · 30s repos",
+   pourquoi:"Stabilise le bassin sur les 82 km. Sur un ultra de 18h max, les muscles du tronc s'épuisent.",
+   etapes:["En appui sur les avant-bras et les orteils. Coudes sous les épaules.","Corps aligné : tête, épaules, hanches, talons.","Contracte le ventre.","Respire normalement.","Ne laisse pas les hanches bouger."],
+   erreurs:["Fesses en l'air","Bassin qui s'affaisse","Apnée"],
+   kine:"Ne tiens pas 45s → commence par 20-30s. Qualité avant durée.",
+   progressions:["S1-S4 : 3×30s","S5-S10 : 3×45s","S11-S14 : 3×60s"]},
+  {id:"B2",nom:"Pont fessier",cat:"Gainage et tronc",col:"#9A5A00",
+   phases:"Tout le plan (S1-S14)",dose:"3 × 15 reps · 1s pause haute · 45s repos",
+   pourquoi:"Active les fessiers — le moteur de la propulsion en montée. Sur 5 boucles avec 5000 D+, des fessiers forts font la différence.",
+   etapes:["Allongé sur le dos, genoux fléchis à 90°.","Bras le long du corps.","Pousse sur les talons, soulève le bassin.","Contracte les fessiers en haut. Tiens 1 sec.","Redescends lentement en 2 sec."],
+   erreurs:["Extension incomplète","Fessiers non contractés","Pieds qui glissent"],
+   kine:"Variante unilateral dès S5 : une jambe tendue.",
+   progressions:["S1-S6 : bilatéral 3×15","S7-S14 : unilatéral 3×12 chaque côté"]},
+  {id:"B3",nom:"Ciseaux du tronc",cat:"Gainage et tronc",col:"#9A5A00",
+   phases:"S1-S10",dose:"3 × 10 reps (5 chaque côté) · Lent · 45s repos",
+   pourquoi:"Renforce le tronc en stabilisation dynamique. Protège le bas du dos sur terrain accidenté de nuit.",
+   etapes:["Allongé sur le dos, bas du dos plaqué.","Bras tendus vers le plafond, genoux fléchis à 90°.","Expire en tendant bras droit + jambe gauche.","Talon ne touche pas le sol.","Reviens en inspirant. Change de côté."],
+   erreurs:["Dos qui se creuse","Rétention de souffle","Mouvement trop rapide"],
+   kine:"Dos qui décolle → réduire l'amplitude. L'exercice est inefficace si tu triches.",
+   progressions:["S1-S4 : bras seulement","S5-S10 : bras + jambe opposée"]},
+  {id:"B4",nom:"Planche latérale",cat:"Gainage et tronc",col:"#9A5A00",
+   phases:"Tout le plan (S1-S14)",dose:"3 × 30s · Chaque côté · 30s repos",
+   pourquoi:"Renforce les obliques et le moyen fessier — stabilisateurs du bassin sur les 18h de course.",
+   etapes:["En appui sur l'avant-bras et le bord du pied.","Soulève les hanches : corps droit tête→pieds.","Bras libre tendu vers le plafond.","Regarde droit devant.","Contracte ventre et fessier du côté d'appui."],
+   erreurs:["Hanche qui s'affaisse","Corps en arc","Épaule vers l'oreille"],
+   kine:"Version facile : appui sur le genou du bas.",
+   progressions:["S1-S6 : 3×20s","S7-S14 : 3×30s"]},
+  {id:"C1",nom:"Monte-escalier latéral",cat:"Fonctionnel trail",col:"#1A5FA8",
+   phases:"S5-S14",dose:"3 × 12 reps · Chaque jambe · 60s repos",
+   pourquoi:"Simule la montée de côte. Renforce le moyen fessier. Sur 5000 D+ de montées, il est sollicité des milliers de fois.",
+   etapes:["Debout face à une caisse de 20-30 cm.","Monte un pied sur la caisse latéralement.","Pousse sur ce pied pour monter le corps.","La hanche montante ne s'incline pas.","Redescends lentement."],
+   erreurs:["Hanche qui s'incline","Utiliser l'élan","Genou en dedans"],
+   kine:"Miroir de côté pour vérifier la hanche. Si elle tombe : renforcer avant d'augmenter.",
+   progressions:["S5-S8 : poids du corps, 20 cm","S9-S14 : haltères 2×5-8 kg, 30 cm"]},
+  {id:"C2",nom:"Équilibre unipodal",cat:"Fonctionnel trail",col:"#1A5FA8",
+   phases:"Tout le plan (S1-S14)",dose:"2-3 × 30s · Chaque pied · Yeux fermés",
+   pourquoi:"Sur terrain accidenté de nuit (boucles 1 et 5 UTOPIC), la stabilité de cheville est vitale. Réduit le risque d'entorse de 40%.",
+   etapes:["Debout sur un pied, genou légèrement fléchi.","Regard fixe d'abord, puis yeux fermés.","Sol dur d'abord, puis coussin mousse.","Jambe levée légèrement fléchie.","Pose le pied si tu vacilles et recommence."],
+   erreurs:["Genou en hyperextension","S'appuyer contre un mur","Pied qui se tord"],
+   kine:"À faire partout : se brosser les dents, attendre le bus.",
+   progressions:["S1-S4 : sol dur yeux ouverts 20s","S5-S10 : yeux fermés 30s","S11-S14 : coussin mousse yeux fermés 30s"]},
+  {id:"C3",nom:"Fentes avant",cat:"Fonctionnel trail",col:"#1A5FA8",
+   phases:"S1-S14",dose:"3 × 12 reps · Chaque jambe · 60s repos",
+   pourquoi:"Renforce l'ensemble du membre inférieur dans un mouvement fonctionnel proche du trail.",
+   etapes:["Debout, pieds à largeur de hanches.","Grand pas en avant.","Descends le genou arrière à 2-3 cm du sol.","Genou avant dans l'axe du 2e orteil.","Pousse sur le pied avant pour revenir."],
+   erreurs:["Pas trop court","Tronc penché","Genou en dedans"],
+   kine:"Commencer sans haltères. Fentes latérales : variante utile pour le moyen fessier.",
+   progressions:["S1-S4 : poids du corps","S5-S10 : haltères 2×5 kg","S11-S14 : haltères 2×8 kg"]},
+  {id:"C4",nom:"Fentes sautées",cat:"Fonctionnel trail",col:"#1A5FA8",
+   phases:"S5-S14 (si pas de douleur rotulienne)",dose:"3 × 10 reps (5 chaque) · Récup complète",
+   pourquoi:"Développe la puissance explosive — indispensable pour les relances après les 5 ravitaillements de l'UTOPIC.",
+   etapes:["Départ en position de fente basse.","Impulsion explosive vers le haut.","Échange les jambes en l'air.","Réception souple, absorption du choc.","Enchaîne immédiatement."],
+   erreurs:["Réception sur les talons","Genoux qui s'effondrent","Amplitude insuffisante"],
+   kine:"Interdites si douleur rotulienne > 2/10. Glaçage 10 min si douleur après.",
+   progressions:["S5-S8 : 3×8 reps","S9-S14 : 3×10 reps"]},
+  {id:"C5",nom:"Squat unipodal assisté",cat:"Fonctionnel trail",col:"#1A5FA8",
+   phases:"S9-S14",dose:"3 × 8 reps · Chaque jambe · Assisté sangle",
+   pourquoi:"Force extrême du quadriceps sur une jambe — simule les descentes techniques de l'UTOPIC avec 5000 D+ de descente.",
+   etapes:["Tiens une sangle ou une porte.","Debout sur un pied, l'autre jambe tendue devant.","Descends lentement en squat (3 sec).","Cuisse à l'horizontale si possible.","Remonte en poussant sur le talon."],
+   erreurs:["Trop d'aide","Pied d'appui sur les orteils","Genou en dedans"],
+   kine:"Exercice avancé : seulement après S9. Consolider le squat bulgare avant.",
+   progressions:["S9-S11 : aide importante","S12-S14 : aide minimale"]},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   PREVENTION DATA
+═══════════════════════════════════════════════════════════ */
+const PREV_SECTIONS = [
+  {title:"Signaux d'alarme — lire ton corps",items:[
+    {level:"vert",label:"Surveiller",titre:"Douleur au réveil qui disparaît en marchant",
+     desc:"Signal normal d'adaptation musculaire.",
+     actions:["Continuer la séance normalement.","10 min de marche d'échauffement au lieu de 5.","Chaleur locale avant la séance si besoin."]},
+    {level:"ambre",label:"Attention",titre:"Douleur en début de séance qui s'atténue",
+     desc:"Signe de tendinopathie débutante. Surveiller.",
+     actions:["Réduire le volume de 30%.",
+     "Supprimer les VMA si présents.","Glaçage 15 min après.","Si répété 2 séances : repos 48h."]},
+    {level:"rouge",label:"Stop",titre:"Douleur qui s'aggrave pendant la séance",
+     desc:"Stop immédiat. Continuer aggraverait la lésion.",
+     actions:["Arrêter immédiatement.","Glace 15 min toutes les 2h.","Repos 48h minimum.","Douleur encore là après 48h → consultation kinésithérapeute."]},
+    {level:"rouge",label:"Stop",titre:"Douleur au repos ou nocturne",
+     desc:"Signal sérieux. Peut indiquer une fracture de stress.",
+     actions:["Ne pas courir sans consultation médicale.","Consultation urgente (< 48h).","Ne pas automédic. avec anti-inflammatoires sans avis."]},
+  ]},
+  {title:"Protocole semaines ratées",items:[
+    {level:"ambre",label:"Règle d'or",titre:"Jamais de rattrapage",
+     desc:"Une semaine ratée ne se rattrape JAMAIS. Reprendre à 70% du volume prévu.",
+     actions:["1-3 jours : reprendre normalement.","4-6 jours : 70% du volume, pas de VMA.","7-10 jours : 60% sur 2 semaines.","11-14 jours : 50% sur 2 semaines.","Maladie fièvreuse : repos complet + 48h après normalisation."]},
+    {level:"ambre",label:"Attention",titre:"FC au repos élevée",
+     desc:"Si ta FC au réveil est +7 bpm vs ta normale : la séance du jour devient une marche de 20 min.",
+     actions:["+3 à +5 bpm : réduire intensité de 20%.","+ 6 à +8 bpm : footing Z1 uniquement.","+ 9 à +12 bpm : marche seulement.","Au-delà : consultation si ça dure 3 jours."]},
+  ]},
+  {title:"Nutrition tendineuse",items:[
+    {level:"vert",label:"Protocole",titre:"Collagène + Vitamine C",
+     desc:"Étude Shaw 2017 : 10-15g de collagène + 50mg de vitamine C, 30-60 min AVANT les séances de renforcement. Double la synthèse de collagène dans les tendons.",
+     actions:["Dose : 10-15g collagène + 50mg vit. C","Timing : 30-60 min avant le renforcement (mercredi)","Forme : gélatine alimentaire ou collagène en poudre","Protéines : 1.6-2.0g/kg/jour","Oméga-3 : 2-3g/jour EPA+DHA","Vitamine D : 1000-2000 UI/jour"]},
+  ]},
+  {title:"J-30 à J-0 — compte à rebours",items:[
+    {level:"ambre",label:"J-30",titre:"Bilan général",desc:"",actions:["État des tendons : Achille, rotule, bandelette.","Kilométrage des chaussures.","Si blessure : consultation immédiate — 30 jours pour guérir."]},
+    {level:"ambre",label:"J-10",titre:"Arrêt renforcement",desc:"",actions:["Arrêt TOTAL du renforcement musculaire excentrique.","Commencer l'hydratation renforcée (+500 ml/jour).","Pas d'alcool cette semaine."]},
+    {level:"vert",label:"J-7",titre:"Massage & récupération",desc:"",actions:["Séance de massage chez un kiné sport.","Focus : mollets, quadriceps, bandelette, fessiers.","Préparer le drop bag si prévu."]},
+    {level:"rouge",label:"J-2",titre:"Dernière activation",desc:"",actions:["Jogging 20 min + 4×30s allure course.","3 côtes courtes.","Coucher avant 22h30 — le sommeil J-2 plus important que J-1."]},
+    {level:"rouge",label:"J-0",titre:"Jour de course",desc:"",actions:["Petit-déjeuner léger 2-3h avant.","Échauffement 10 min marche active.","Départ 30% plus lentement que ce que tu crois pouvoir tenir."]},
+  ]},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   PARCOURS DATA
+═══════════════════════════════════════════════════════════ */
+const PARCOURS = [
+  {phase:"Phase 1 · Dimanche",col:"#1A5FA8",band:"#1A5FA8",
+   nom:"Tour Lac de Saint-Point",lieu:"Malbuisson — 15 min de Montperreux",
+   km:"14-17 km",dp:"300-420 D+",type:"Sortie longue",
+   desc:"Depuis le parking Malbuisson, monter vers les coteaux est (+80-100 m D+), longer les hauteurs, redescendre vers le lac, tour partiel nord. Terrain mixte plat/vallonné.",
+   tips:["Trajet voiture : Montperreux → Malbuisson, 15 min","GPS : 'Tour Lac Saint-Point' sur Komoot ou AllTrails","D+ en variant les coteaux est","Idéal pour les dimanches S1-S4"]},
+  {phase:"Phase 2 · Dimanche S5-S7",col:"#1E7A3A",band:"#1E7A3A",
+   nom:"Circuit 19 — A l'assaut du Mont d'Or",lieu:"Métabief — 20 min de Montperreux",
+   km:"15 km",dp:"600 D+",type:"Sortie longue",
+   desc:"GR5 depuis Métabief → Morond (400 m D+ depuis le bas) → crêtes Mont d'Or (1463 m) → retour. Vue sur les Alpes et le Mont Blanc par temps clair.",
+   tips:["Trajet voiture : Montperreux → Métabief, 20-25 min","GPS : tracedetrail.fr/fr/trace/231912","Emporter eau : pas de point sur les crêtes","Éviter par vent fort sur les crêtes"]},
+  {phase:"Phase 2 · Dimanche S8-S10",col:"#1E7A3A",band:"#1E7A3A",
+   nom:"Circuit 20 — Crêtes Mont d'Or étendu",lieu:"Métabief",
+   km:"20-22 km",dp:"790-900 D+",type:"Sortie longue",
+   desc:"Extension du circuit 19 avec passage côté suisse par la Source du Creux Soudet et l'alpage de Prallioux Dessus. Monotrace technique sur les crêtes.",
+   tips:["GPS : tracedetrail.fr/fr/trace/231913","Passage en Suisse : prévoir carte si besoin","1.5L d'eau minimum","Durée : 3h30-4h30"]},
+  {phase:"Phase 3 · Dimanche S11-S14",col:"#9A5A00",band:"#9A5A00",
+   nom:"Tour Jougne — Le Suchet (étendu)",lieu:"Jougne / Entre-les-Fourgs — 30 min de Montperreux",
+   km:"20-26 km",dp:"1100-1500 D+",type:"Sortie longue",
+   desc:"Ton terrain record (1477 D+ en septembre 2025). Tour Jougne - Le Suchet comme base (20 km / 770 D+), extension vers les crêtes Mont Ramey pour atteindre 1100-1500 D+.",
+   tips:["Trajet voiture : Montperreux → Jougne, 30 min","GPS : 'Tour Jougne Le Suchet' sur VisuGPX","S13 : 26 km / 1200 D+ — emporter ravitaillement 4h+","Terrain connu = avantage psychologique"]},
+  {phase:"WE Choc 1 · Samedi (S9)",col:"#C0392B",band:"#C0392B",
+   nom:"Métabief crêtes — circuit long",lieu:"Métabief",
+   km:"25-28 km",dp:"900-1000 D+",type:"WE Choc 1 — Samedi",
+   desc:"GR5 → Morond → crêtes Mont d'Or → Mont Ramey → Les Fourgs → retour Métabief. Pour l'UTOPIC : départ 5h avec frontale.",
+   tips:["Départ 5h avec frontale (UTOPIC)","Allure conservative FC < 152","GPS : Circuit 20 étendu","2L eau + 4 gels + 2 barres"]},
+  {phase:"WE Choc 1 · Dimanche (S9)",col:"#C0392B",band:"#C0392B",
+   nom:"Boucle Jougne — longue",lieu:"Jougne",
+   km:"32-38 km",dp:"1100-1300 D+",type:"WE Choc 1 — Dimanche",
+   desc:"Terrain connu pour le dimanche du WE choc. Boucle crêtes, Mont Ramey, Jougnena + extension vers le Suchet.",
+   tips:["Marcher > 8% — jambes lourdes du samedi","Ravitaillement voiture à 20 km","Total WE : 66 km / 2300 D+ = 80% UTOPIC","Si douleur > 3/10 à 20 km : rentrer"]},
+  {phase:"WE Choc 2 · Samedi (S12)",col:"#C0392B",band:"#C0392B",
+   nom:"Jougne — Départ 5h00",lieu:"Jougne",
+   km:"32 km",dp:"1300 D+",type:"WE Choc 2 — Samedi",
+   desc:"Départ exactement à 5h00 avec frontale. Simulation complète UTOPIC. Matériel de course complet. Protocole nutritionnel identique à la course.",
+   tips:["5h00 exact avec frontale","Matériel obligatoire UTOPIC complet","Nutrition identique à la course","GPS : Tour Jougne extended"]},
+  {phase:"WE Choc 2 · Dimanche (S12)",col:"#C0392B",band:"#C0392B",
+   nom:"La plus longue du plan",lieu:"Jougne ou Métabief",
+   km:"38-42 km",dp:"1400-1600 D+",type:"WE Choc 2 — Dimanche",
+   desc:"La sortie la plus longue du plan. Au-delà de 32 km : territoire inconnu — c'est exactement ce qu'on entraîne. 2 ravitaillements : à 20 km ET 32 km.",
+   tips:["Total WE : 74 km / 2900 D+ = 90% UTOPIC","Ravitaillement posé à 20 km ET 32 km","Si douleur > 4/10 : arrêter","Option : Jougne ou Métabief selon les jambes"]},
+];
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+const SECTIONS = ['home','plan','exercices','prevention','parcours'];
+
+function goTo(id) {
+  SECTIONS.forEach(s => {
+    document.getElementById('s-'+s).classList.toggle('active', s===id);
+    document.getElementById('nav-'+s)?.classList.toggle('active', s===id);
+  });
+  window.scrollTo(0,0);
+  if(id==='plan') renderPlan();
+}
+
+function setRace(race) {
+  currentRace = race;
+  document.getElementById('btn-utopic').classList.toggle('active', race==='utopic');
+  document.getElementById('btn-utmj').classList.toggle('active', race==='utmj');
+  updateHomeForRace();
+  openWeeks = {};
+  if(document.getElementById('s-plan').classList.contains('active')) renderPlan();
+}
+
+function updateHomeForRace() {
+  const r = RACES[currentRace];
+  document.getElementById('home-title').textContent = r.name;
+  document.getElementById('home-sub').textContent = r.detail;
+  document.getElementById('hero-race').textContent = r.short;
+  document.getElementById('hero-sub').textContent = r.detail;
+  document.getElementById('hero-dates').textContent = r.date;
+  document.getElementById('plan-sub').textContent = r.planSub;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PROGRESS WEEKS RENDER
+═══════════════════════════════════════════════════════════ */
+function renderProgress() {
+  const chocWeeks = [9, 12];
+  const phases_color = {1:'phase1',2:'phase2',3:'phase3',4:'phase4'};
+  const week_phase = {};
+  for(let i=1;i<=4;i++) week_phase[i]='phase1';
+  for(let i=5;i<=10;i++) week_phase[i]='phase2';
+  for(let i=11;i<=14;i++) week_phase[i]='phase3';
+  for(let i=15;i<=16;i++) week_phase[i]='phase4';
+
+  const container = document.getElementById('prog-weeks');
+  container.innerHTML = '';
+  for(let i=1;i<=16;i++){
+    const div = document.createElement('div');
+    div.className = 'prog-w ' + week_phase[i] + (chocWeeks.includes(i)?' choc':'');
+    div.title = `S${i}`;
+    container.appendChild(div);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PLAN RENDER
+═══════════════════════════════════════════════════════════ */
+function renderPlan() {
+  const phases = currentRace === 'utopic' ? PHASES_UTOPIC : PHASES_UTMJ;
+  const tabsEl = document.getElementById('phase-tabs');
+  tabsEl.innerHTML = phases.map((ph,i) =>
+    `<button class="phase-tab ${i===currentPhase?'active':''}"
+      style="${i===currentPhase?`background:${ph.col};color:#fff;border-color:${ph.col}`:''}"
+      onclick="setPhase(${i})">${ph.name}<br><small style="font-size:10px;opacity:.7">${ph.sem}</small></button>`
+  ).join('');
+
+  const ph = phases[currentPhase];
+  const container = document.getElementById('weeks-container');
+  container.innerHTML = `
+    <div style="margin:0 16px 12px;padding:10px 12px;background:var(--bg3);border-radius:var(--r2);border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:500;color:${ph.col};text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">${ph.label}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">${ph.desc}</div>
+    </div>
+    ${ph.semaines.map(sem => renderWeek(sem, ph.col)).join('')}
+  `;
+}
+
+function setPhase(i) {
+  currentPhase = i;
+  renderPlan();
+}
+
+function renderWeek(sem, col) {
+  const key = `w${sem.n}`;
+  const isOpen = openWeeks[key];
+  const dayColors = {
+    'd-lun':'#1A5FA8','d-mer':'#1E7A3A','d-ven':'#9A5A00','d-dim':'#C0392B','d-sam':'#C0392B'
+  };
+  const badges = `
+    <span class="badge ${sem.recup?'badge-amber':'badge-green'}">${sem.km} km</span>
+    <span class="badge badge-blue">${sem.dp} D+</span>
+    ${sem.recup?'<span class="badge badge-amber">récup</span>':''}
+    ${sem.choc?'<span class="badge badge-red">⚡ choc</span>':''}
+  `;
+
+  const sessions = sem.seances.map(s => {
+    const dc = dayColors[s.dl] || '#888';
+    const tips = s.tips.map(([who,txt]) => {
+      const cls = who==='C'?'tip-c':who==='K'?'tip-k':'tip-d';
+      const lbl = who==='C'?'Entraineur':who==='K'?'Kiné':'Data';
+      return `<div class="expert-tip"><span class="tip-who ${cls}">${lbl}</span><span style="color:var(--text3)">${txt}</span></div>`;
+    }).join('');
+    return `
+      <div class="session">
+        <div class="session-day" style="background:${dc}"></div>
+        <div class="session-content">
+          <div class="session-header">
+            <span class="day-label ${s.dl}">${s.j}</span>
+            <span class="type-label">${s.type}</span>
+          </div>
+          <div class="session-title">${s.titre}</div>
+          <div class="session-detail">${s.detail}</div>
+          ${tips}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="week-card">
+      <button class="week-head" onclick="toggleWeek('${key}')">
+        <div class="week-num" style="color:${col}">S${sem.n}</div>
+        <div class="week-info">
+          <div class="week-title">Semaine ${sem.n}${sem.recup?' — Récupération':sem.choc?' — ⚡ Week-end Choc':''}</div>
+          <div class="week-meta">${sem.km} km · ${sem.dp} D+</div>
+        </div>
+        <div class="week-badges">${badges}</div>
+        <span style="color:var(--text3);font-size:14px;transition:transform .2s;${isOpen?'transform:rotate(90deg)':''}">▶</span>
+      </button>
+      <div class="week-body ${isOpen?'open':''}">${sessions}</div>
+    </div>
+  `;
+}
+
+function toggleWeek(key) {
+  openWeeks[key] = !openWeeks[key];
+  renderPlan();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXERCISES RENDER
+═══════════════════════════════════════════════════════════ */
+function renderExercices() {
+  const groups = {A:[],B:[],C:[]};
+  EXERCISES.forEach(ex => groups[ex.id[0]].push(ex));
+  ['A','B','C'].forEach(g => {
+    document.getElementById('ex-'+g).innerHTML = groups[g].map(ex => renderEx(ex)).join('');
+  });
+}
+
+function renderEx(ex) {
+  const key = 'ex-'+ex.id;
+  const isOpen = openEx[key];
+  return `
+    <div class="ex-card">
+      <button class="ex-head" onclick="toggleEx('${key}')">
+        <div class="ex-code" style="color:${ex.col}">${ex.id}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.nom}</div>
+          <div class="ex-cat">${ex.cat} · ${ex.phases}</div>
+        </div>
+        <span class="badge badge-gray" style="flex-shrink:0">${ex.dose.split('·')[0].trim()}</span>
+        <span style="color:var(--text3);font-size:12px;margin-left:4px;transition:transform .2s;${isOpen?'transform:rotate(90deg)':''}">▶</span>
+      </button>
+      <div class="ex-body ${isOpen?'open':''}">
+        <div class="why-box">💡 ${ex.pourquoi}</div>
+        <div class="ex-section">Exécution</div>
+        ${ex.etapes.map((e,i) => `
+          <div class="step-row">
+            <div class="step-num" style="background:${ex.col}22;color:${ex.col}">${i+1}</div>
+            <div class="step-txt">${e}</div>
+          </div>
+        `).join('')}
+        <div class="divider"></div>
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="info-box-label">Dose</div>
+            <div class="info-box-val">${ex.dose}</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Conseil kiné</div>
+            <div class="info-box-val">${ex.kine}</div>
+          </div>
+        </div>
+        <div class="ex-section">Erreurs fréquentes</div>
+        ${ex.erreurs.map(e => `<div class="err-item"><span class="err-x">✗</span><span style="font-size:12px;color:var(--text2)">${e}</span></div>`).join('')}
+        <div class="ex-section">Progressions</div>
+        ${ex.progressions.map(p => `<div class="prog-bar">→ ${p}</div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function toggleEx(key) {
+  openEx[key] = !openEx[key];
+  renderExercices();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PREVENTION RENDER
+═══════════════════════════════════════════════════════════ */
+function renderPrevention() {
+  const colMap = {vert:{bg:'a-green',col:'var(--green)'},ambre:{bg:'a-amber',col:'var(--amber)'},rouge:{bg:'a-red',col:'var(--red)'}};
+  let html = '<div class="prev-grid">';
+  PREV_SECTIONS.forEach(section => {
+    html += `<div class="section-header"><div class="section-header-title">${section.title}</div></div>`;
+    html += '<div style="padding:0 16px 4px;display:flex;flex-direction:column;gap:8px">';
+    section.items.forEach(item => {
+      const c = colMap[item.level];
+      html += `
+        <div class="alert-card ${c.bg}">
+          <div class="alert-head">
+            <span class="alert-level">${item.label}</span>
+            <span class="alert-title">${item.titre}</span>
+          </div>
+          <div class="alert-body">
+            ${item.desc ? `<div style="margin-bottom:8px;color:var(--text2);font-size:12px">${item.desc}</div>` : ''}
+            ${item.actions.map(a => `<div class="alert-action"><span class="alert-arrow">→</span><span style="font-size:12px">${a}</span></div>`).join('')}
+          </div>
+        </div>
+      `;
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('prev-content').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PARCOURS RENDER
+═══════════════════════════════════════════════════════════ */
+function renderParcours() {
+  const html = '<div class="route-grid">' + PARCOURS.map(r => `
+    <div class="route-card">
+      <div class="route-band" style="background:${r.band}"></div>
+      <div class="route-content">
+        <div class="route-header">
+          <div>
+            <div class="route-name">${r.nom}</div>
+            <div class="route-phase" style="color:${r.col}">${r.phase}</div>
+          </div>
+        </div>
+        <div class="route-stats">
+          <span class="badge badge-green">${r.km}</span>
+          <span class="badge badge-blue">${r.dp}</span>
+          <span class="badge badge-gray">${r.lieu}</span>
+        </div>
+        <div class="route-desc">${r.desc}</div>
+        <div class="route-tips">
+          ${r.tips.map(t => `<div class="route-tip"><span>→</span><span>${t}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('') + '</div>';
+  document.getElementById('parcours-content').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+renderProgress();
+renderExercices();
+renderPrevention();
+renderParcours();
+updateHomeForRace();
+</script>
+</body>
+</html>
