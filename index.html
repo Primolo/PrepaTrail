@@ -489,6 +489,26 @@ body{
   <div id="parcours-content"></div>
 </div>
 
+<!-- CALENDRIER -->
+<div id="s-calendrier" class="section">
+  <div class="page-header">
+    <div class="page-label">Planning semaine par semaine</div>
+    <div class="page-title">CALENDRIER</div>
+    <div class="page-subtitle">23 mars → 12 juillet 2026 · Toutes les dates</div>
+  </div>
+  <div id="cal-content"></div>
+</div>
+
+<!-- RAPPORT -->
+<div id="s-rapport" class="section">
+  <div class="page-header">
+    <div class="page-label">Analyse de la semaine</div>
+    <div class="page-title">RAPPORT</div>
+    <div class="page-subtitle" id="rapport-sub">Semaine 1 · 23-29 mars 2026</div>
+  </div>
+  <div id="rapport-content"></div>
+</div>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <button class="nav-item active" id="nav-home" onclick="goTo('home')">
@@ -496,6 +516,12 @@ body{
   </button>
   <button class="nav-item" id="nav-plan" onclick="goTo('plan')">
     <span class="nav-icon">📅</span>Plan
+  </button>
+  <button class="nav-item" id="nav-calendrier" onclick="goTo('calendrier')">
+    <span class="nav-icon">🗓</span>Agenda
+  </button>
+  <button class="nav-item" id="nav-rapport" onclick="goTo('rapport')">
+    <span class="nav-icon">📊</span>Rapport
   </button>
   <button class="nav-item" id="nav-exercices" onclick="goTo('exercices')">
     <span class="nav-icon">💪</span>Renfo
@@ -848,7 +874,7 @@ const PARCOURS = [
 /* ═══════════════════════════════════════════════════════════
    NAVIGATION
 ═══════════════════════════════════════════════════════════ */
-const SECTIONS = ['home','plan','exercices','prevention','parcours'];
+const SECTIONS = ['home','plan','exercices','prevention','parcours','calendrier','rapport'];
 
 function goTo(id) {
   SECTIONS.forEach(s => {
@@ -1103,6 +1129,313 @@ function renderParcours() {
   document.getElementById('parcours-content').innerHTML = html;
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   CALENDRIER DATA & RENDER
+═══════════════════════════════════════════════════════════ */
+
+// Plan start: lundi 23 mars 2026
+// Race: dimanche 12 juillet 2026
+const PLAN_START = new Date(2026, 2, 23); // mois 0-indexed
+const RACE_DATE  = new Date(2026, 6, 12);
+
+const JOURS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+const MOIS_FR  = ['jan','fév','mar','avr','mai','juin','juil','août','sep','oct','nov','déc'];
+
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+
+// Séances par semaine : [lundi, mercredi, vendredi, dimanche (+ samedi si WE choc)]
+const SEANCES_SEMAINE = {
+  1:  [{j:'Lun',type:'Endurance',detail:'50 min Z2, D+150, FC<145'},{j:'Mer',type:'Renfo',detail:'20 min renfo + 30 min Z1'},{j:'Ven',type:'Côtes',detail:'5×3 min Z3 / D+240'},{j:'Dim',type:'Longue',detail:'14-15 km / D+300 / Lac Saint-Point'}],
+  2:  [{j:'Lun',type:'Endurance',detail:'55 min Z2, D+180'},{j:'Mer',type:'Renfo',detail:'Renfo jambes + 5×2 min Z3'},{j:'Ven',type:'Côtes',detail:'6×3 min Z3 / D+285'},{j:'Dim',type:'Longue',detail:'15 km / D+420 / Lac Saint-Point'}],
+  3:  [{j:'Lun',type:'Endurance',detail:'60 min Z2, D+230'},{j:'Mer',type:'Renfo',detail:'Renfo tronc + 2×10 min Z3'},{j:'Ven',type:'Côtes',detail:'6×4 min Z3 / D+340'},{j:'Dim',type:'Longue',detail:'17-18 km / D+570 / Lac Saint-Point'}],
+  4:  [{j:'Lun',type:'Récup',detail:'30 min Z1'},{j:'Mer',type:'Renfo',detail:'Renfo léger + 22 min Z1'},{j:'Ven',type:'Légère',detail:'4×3 min Z2-Z3 / D+170'},{j:'Dim',type:'Légère',detail:'10-11 km / D+200'}],
+  5:  [{j:'Lun',type:'Endurance',detail:'60 min Z2, D+250'},{j:'Mer',type:'Seuil',detail:'Renfo + 2×10 min Z4'},{j:'Ven',type:'VMA',detail:'8×45s Z5 / D+280'},{j:'Dim',type:'Longue',detail:'15 km / D+600 / Métabief Circuit 19'}],
+  6:  [{j:'Lun',type:'Endurance',detail:'52 min Z1, D+220'},{j:'Mer',type:'VO2max',detail:'Renfo + 6×3 min Z5'},{j:'Ven',type:'Côtes',detail:'5×5 min Z3-Z4 / D+380'},{j:'Dim',type:'Longue',detail:'22 km / D+700 / Métabief'}],
+  7:  [{j:'Lun',type:'Endurance',detail:'65 min Z2, D+300'},{j:'Mer',type:'Seuil',detail:'Renfo + 3×10 min Z4'},{j:'Ven',type:'Mixte',detail:'5×45s Z5 + 3×4 min Z4 / D+400'},{j:'Dim',type:'Longue',detail:'23 km / D+800 / Circuit 20'}],
+  8:  [{j:'Lun',type:'Récup',detail:'30 min Z1'},{j:'Mer',type:'Renfo',detail:'Renfo léger + 22 min Z1'},{j:'Ven',type:'Légère',detail:'5×3 min Z2-Z3 / D+220'},{j:'Dim',type:'Légère',detail:'11-12 km / D+230'}],
+  9:  [{j:'Lun',type:'Endurance',detail:'65 min Z2, D+300'},{j:'Mer',type:'Activation',detail:'15 min renfo léger + 45 min Z2'},{j:'Ven',type:'Légère',detail:'3×3 min Z2 / D+130'},{j:'Sam',type:'⚡ WE Choc 1',detail:'28 km / D+1000 — 5h avec frontale / Métabief'},{j:'Dim',type:'⚡ WE Choc 1',detail:'38 km / D+1300 / Jougne'}],
+  10: [{j:'Lun',type:'Récup',detail:'40 min Z1'},{j:'Mer',type:'Seuil',detail:'Renfo + 4×10 min Z4'},{j:'Ven',type:'Mixte',detail:'6×45s Z5 + 4×5 min Z4 / D+520'},{j:'Dim',type:'Longue',detail:'27 km / D+1000 / Métabief étendu'}],
+  11: [{j:'Lun',type:'Endurance',detail:'65 min Z2, D+320'},{j:'Mer',type:'Tempo',detail:'Renfo force + 3×12 min Z4'},{j:'Ven',type:'Côtes spéc.',detail:'4×9 min Z3-Z4 / D+580'},{j:'Dim',type:'Longue',detail:'28-30 km / D+1000 / Jougne'}],
+  12: [{j:'Lun',type:'Endurance',detail:'55 min Z1, D+250'},{j:'Mer',type:'Activation',detail:'15 min renfo léger + 45 min Z2'},{j:'Ven',type:'Légère',detail:'3×3 min Z2 / D+130'},{j:'Sam',type:'⚡ WE Choc 2',detail:'32 km / D+1300 — 5h00 exactement / Jougne'},{j:'Dim',type:'⚡ WE Choc 2',detail:'42 km / D+1600 / PLUS LONGUE DU PLAN'}],
+  13: [{j:'Lun',type:'Récup',detail:'40 min Z1'},{j:'Mer',type:'Seuil',detail:'Renfo + 4×10 min Z4'},{j:'Ven',type:'PIC',detail:'6×45s Z5 + 5×9 min Z3-Z4 / D+850'},{j:'Dim',type:'Pic',detail:'33-35 km / D+1400 / Jougne'}],
+  14: [{j:'Lun',type:'Récup',detail:'30 min Z1'},{j:'Mer',type:'Renfo',detail:'Renfo léger + 22 min Z1'},{j:'Ven',type:'Légère',detail:'4×3 min Z2-Z3 / D+200'},{j:'Dim',type:'Facile',detail:'12 km / D+300'}],
+  15: [{j:'Lun',type:'Footing',detail:'30 min Z1, D+80'},{j:'Mer',type:'Micro',detail:'30 min + 3×2 min Z4'},{j:'Ven',type:'Légère',detail:'3×3 min Z2-Z3 / D+150'},{j:'Dim',type:'Matériel',detail:'1h / D+220 / Test frontale + matériel complet'}],
+  16: [{j:'Lun',type:'Trot',detail:'20 min Z1'},{j:'Mer',type:'Activation',detail:'15 min + 4×30s allure course'},{j:'Ven',type:'3 côtes',detail:'3×30s en côte / D+45'},{j:'Dim',type:'🏔 UTOPIC',detail:'82 km / 5000 D+ · Départ 5h00 · SAINT-CLAUDE'}],
+};
+
+const TYPE_COL_CAL = {
+  'Endurance':'#1A5FA8','Récup':'#5a705a','Renfo':'#1E7A3A','Côtes':'#9A5A00',
+  'VMA':'#6B3FA0','VO2max':'#6B3FA0','Seuil':'#9A5A00','Mixte':'#9A5A00',
+  'Tempo':'#9A5A00','Côtes spéc.':'#9A5A00','PIC':'#C0392B','Pic':'#C0392B',
+  'Légère':'#3a5a3a','Légères':'#3a5a3a','Facile':'#3a5a3a','Activation':'#3a5a3a',
+  'Longue':'#C0392B','Longues':'#C0392B','Matériel':'#C0392B','Micro':'#1A5FA8',
+  'Footing':'#1A5FA8','Trot':'#1A5FA8','3 côtes':'#9A5A00',
+  '⚡ WE Choc 1':'#C0392B','⚡ WE Choc 2':'#C0392B','🏔 UTOPIC':'#4ade80',
+};
+
+const PHASE_FOR_WEEK = {1:'Fondation',2:'Fondation',3:'Fondation',4:'Fondation',
+  5:'Construction',6:'Construction',7:'Construction',8:'Construction',9:'Construction',10:'Construction',
+  11:'Spécifique',12:'Spécifique',13:'Spécifique',14:'Spécifique',
+  15:'Affûtage',16:'Affûtage'};
+const PHASE_COL_CAL = {
+  'Fondation':'#1A5FA8','Construction':'#1E7A3A','Spécifique':'#9A5A00','Affûtage':'#C0392B'};
+
+function renderCalendrier() {
+  let html = '<div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">';
+
+  // WE choc banner
+  html += `
+    <div style="background:#3a1010;border:1px solid #C0392B;border-radius:var(--r);padding:12px 14px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#f87171;margin-bottom:6px">⚡ Week-ends Choc</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#1a0808;border-radius:6px;padding:8px">
+          <div style="font-size:11px;color:#f87171;font-weight:500;margin-bottom:2px">WE Choc 1</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Sam 23 & Dim 24 mai</div>
+          <div style="font-size:11px;color:var(--text3)">66 km / 2300 D+</div>
+        </div>
+        <div style="background:#1a0808;border-radius:6px;padding:8px">
+          <div style="font-size:11px;color:#f87171;font-weight:500;margin-bottom:2px">WE Choc 2</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Sam 13 & Dim 14 juin</div>
+          <div style="font-size:11px;color:var(--text3)">74 km / 2900 D+</div>
+        </div>
+      </div>
+    </div>`;
+
+  for (let s = 1; s <= 16; s++) {
+    const monday = addDays(PLAN_START, (s-1)*7);
+    const sunday = addDays(monday, 6);
+    const phase = PHASE_FOR_WEEK[s];
+    const pcol  = PHASE_COL_CAL[phase];
+    const seances = SEANCES_SEMAINE[s] || [];
+    const isChoc = [9,12].includes(s);
+    const isRecup = [4,8,14].includes(s);
+    const isCourse = s === 16;
+
+    const label = isChoc ? '⚡ WE CHOC' : isRecup ? 'Récupération' : isCourse ? '🏔 COURSE' : phase;
+    const borderCol = isChoc||isCourse ? '#C0392B' : pcol;
+
+    // Build days for this week
+    let daysHtml = '';
+    // Map by day initial
+    const jourOffset = {'Lun':0,'Mar':1,'Mer':2,'Jeu':3,'Ven':4,'Sam':5,'Dim':6};
+    seances.forEach(seance => {
+      const offset = jourOffset[seance.j] !== undefined ? jourOffset[seance.j] : 0;
+      const dayDate = addDays(monday, offset);
+      const col = TYPE_COL_CAL[seance.type] || '#5a705a';
+      const isToday = dayDate.toDateString() === new Date().toDateString();
+      const isPast = dayDate < new Date() && !isToday;
+      daysHtml += `
+        <div style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);opacity:${isPast?'.6':'1'}">
+          <div style="min-width:80px;flex-shrink:0">
+            <div style="font-size:10px;color:var(--text3)">${seance.j}</div>
+            <div style="font-size:12px;font-weight:500;color:${isToday?'var(--green)':'var(--text2)'}">${dayDate.getDate()} ${MOIS_FR[dayDate.getMonth()]}</div>
+          </div>
+          <div style="flex:1">
+            <div style="display:inline-flex;align-items:center;padding:1px 7px;border-radius:20px;background:${col}22;border:1px solid ${col}44;font-size:10px;font-weight:500;color:${col};margin-bottom:3px">${seance.type}</div>
+            <div style="font-size:11px;color:var(--text2);line-height:1.4">${seance.detail}</div>
+          </div>
+          ${isPast ? '<span style="font-size:14px">✓</span>' : isToday ? '<span style="font-size:14px;color:var(--green)">▶</span>' : ''}
+        </div>`;
+    });
+
+    html += `
+      <div style="background:var(--card);border:1px solid ${borderCol}44;border-left:3px solid ${borderCol};border-radius:var(--r);overflow:hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:${borderCol}12;cursor:pointer" onclick="toggleCal(${s})">
+          <div>
+            <div style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:${borderCol}">S${s} · ${label}</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);margin-top:2px">${monday.getDate()} ${MOIS_FR[monday.getMonth()]} → ${sunday.getDate()} ${MOIS_FR[sunday.getMonth()]}</div>
+          </div>
+          <span id="cal-arr-${s}" style="color:var(--text3);font-size:12px;transition:transform .2s">▶</span>
+        </div>
+        <div id="cal-body-${s}" style="display:none;padding:4px 14px 10px">${daysHtml}</div>
+      </div>`;
+  }
+  html += '</div>';
+  document.getElementById('cal-content').innerHTML = html;
+  // Auto-open current week
+  const now = new Date();
+  for (let s=1;s<=16;s++){
+    const mon = addDays(PLAN_START,(s-1)*7);
+    const sun = addDays(mon,6);
+    if(now >= mon && now <= sun){ openCal(s); break; }
+  }
+}
+
+function openCal(s){ document.getElementById('cal-body-'+s).style.display='block'; const a=document.getElementById('cal-arr-'+s); if(a) a.style.transform='rotate(90deg)'; }
+function toggleCal(s){
+  const b=document.getElementById('cal-body-'+s);
+  const a=document.getElementById('cal-arr-'+s);
+  if(!b)return;
+  const open = b.style.display==='block';
+  b.style.display=open?'none':'block';
+  if(a) a.style.transform=open?'':'rotate(90deg)';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RAPPORT S1 — Semaine 1 · 23-29 mars 2026
+═══════════════════════════════════════════════════════════ */
+function renderRapport() {
+  const html = `
+  <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+
+    <!-- Score global -->
+    <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:var(--r);padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:4px">Semaine 1 · 23-29 mars</div>
+          <div style="font-size:28px;font-family:var(--font-head);letter-spacing:1px;color:var(--text)">PARTIELLE</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:4px">2 séances réalisées sur 4 planifiées</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:42px;font-family:var(--font-head);color:var(--amber)">50%</div>
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Complétude</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bilan séances -->
+    <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding-top:4px">Bilan séance par séance</div>
+
+    <!-- Lundi -->
+    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid #5a705a;border-radius:var(--r);padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+          <span style="font-size:10px;font-weight:500;color:#60a5fa;background:#0f2a4a;padding:1px 7px;border-radius:20px">Lundi 23 mars</span>
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-top:4px">Endurance Z2 — D+150</div>
+        </div>
+        <div style="background:#3a1010;border:1px solid var(--red);border-radius:6px;padding:4px 10px;text-align:center">
+          <div style="font-size:16px">❌</div>
+          <div style="font-size:10px;color:var(--red)">Manquée</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);background:var(--bg3);border-radius:6px;padding:8px">
+        <strong style="color:var(--amber)">Protocole semaine ratée :</strong> 1-3 jours d'absence = reprendre normalement. Lundi manqué → pas de rattrapage. S2 commence normalement lundi prochain.
+      </div>
+    </div>
+
+    <!-- Mercredi -->
+    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:var(--r);padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div>
+          <span style="font-size:10px;font-weight:500;color:var(--green);background:var(--green-dim);padding:1px 7px;border-radius:20px">Mercredi 25 mars</span>
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-top:4px">Renforcement + footing</div>
+        </div>
+        <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:6px;padding:4px 10px;text-align:center">
+          <div style="font-size:16px">✅</div>
+          <div style="font-size:10px;color:var(--green)">Partiel</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">
+        Renforcement réalisé ✓ — footing non effectué.<br>
+        <span style="color:var(--green);font-weight:500">Coach :</span> Le renfo seul est valide — c'est la partie la plus importante du mercredi en phase 1. Le footing de 30 min est secondaire.<br>
+        <span style="color:var(--amber);font-weight:500">Kiné :</span> Tu as fait le relevé nordique dès S1 ? Si oui, courbatures ischio les 48h suivantes = normal.
+      </div>
+    </div>
+
+    <!-- Vendredi -->
+    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:var(--r);padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-size:10px;font-weight:500;color:var(--amber);background:var(--amber-dim);padding:1px 7px;border-radius:20px">Vendredi 27 mars · 16h08</span>
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-top:4px">5.75 km · 228 D+ · FC 141 · 47 min</div>
+        </div>
+        <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;padding:4px 10px;text-align:center">
+          <div style="font-size:16px">⚠️</div>
+          <div style="font-size:10px;color:var(--amber)">Adapté</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">D+</div>
+          <div style="font-size:14px;font-weight:500;color:var(--green)">228 m</div>
+          <div style="font-size:9px;color:var(--text3)">cible 240 ✓</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">FC moy.</div>
+          <div style="font-size:14px;font-weight:500;color:var(--green)">141 bpm</div>
+          <div style="font-size:9px;color:var(--text3)">Z2 correct ✓</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">Type réel</div>
+          <div style="font-size:14px;font-weight:500;color:var(--amber)">Endurance</div>
+          <div style="font-size:9px;color:var(--text3)">≠ côtes Z3</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;background:var(--bg3);border-radius:6px;padding:8px">
+        <span style="color:#60a5fa;font-weight:500">Coach :</span> Pas de répétitions de côtes Z3 visibles — c'est une sortie endurance Z2. Le D+ est bon (228 m) mais la séance vendredi devait être <em>structurée</em> : 5 montées × 3 min Z3 avec récup marchée. Pour S2, vendredi = trouver ta côte et faire les répétitions.<br><br>
+        <span style="color:var(--green);font-weight:500">Kiné :</span> FC 141 et allure 8:15 min/km = très confortable. Pour les côtes Z3 : FC cible 148-155. Ça fait une vraie différence.<br><br>
+        <span style="color:var(--amber);font-weight:500">Data :</span> Ratio D+/km : 228/5.75 = 39.7 m/km. Au-dessus de ta moyenne vendredi habituelle (27 m/km). Bon signe.
+      </div>
+    </div>
+
+    <!-- Dimanche -->
+    <div style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--red);border-radius:var(--r);padding:12px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-size:10px;font-weight:500;color:var(--red);background:var(--red-dim);padding:1px 7px;border-radius:20px">Dimanche 29 mars · 10h39</span>
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-top:4px">11.18 km · 307 D+ · FC 159 · 1h17</div>
+        </div>
+        <div style="background:var(--amber-dim);border:1px solid var(--amber);border-radius:6px;padding:4px 10px;text-align:center">
+          <div style="font-size:16px">⚠️</div>
+          <div style="font-size:10px;color:var(--amber)">Partiel</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">Distance</div>
+          <div style="font-size:14px;font-weight:500;color:var(--amber)">11.2 km</div>
+          <div style="font-size:9px;color:var(--text3)">cible 14-15 ⚠</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">D+</div>
+          <div style="font-size:14px;font-weight:500;color:var(--green)">307 m</div>
+          <div style="font-size:9px;color:var(--text3)">cible 300 ✓</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">FC moy.</div>
+          <div style="font-size:14px;font-weight:500;color:var(--red)">159 bpm</div>
+          <div style="font-size:9px;color:var(--text3)">cible &lt;148 ❌</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:7px;text-align:center">
+          <div style="font-size:10px;color:var(--text3)">Allure</div>
+          <div style="font-size:14px;font-weight:500;color:var(--red)">6:56/km</div>
+          <div style="font-size:9px;color:var(--text3)">trop rapide</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;background:var(--bg3);border-radius:6px;padding:8px">
+        <span style="color:#60a5fa;font-weight:500">Coach :</span> D+ excellent (307 m, exactement la cible). Distance courte (-26%) mais acceptable pour une S1. <strong>Point critique :</strong> FC 159 bpm sur une sortie longue Z2 = trop haute. La cible était &lt;148 bpm. Tu es allé trop vite (6:56 min/km = allure course). La sortie longue doit être à allure conversation, même si ça semble lent.<br><br>
+        <span style="color:var(--green);font-weight:500">Kiné :</span> FC élevée = système tendineux sollicité au-delà du Z2. Sur la durée ça crée de la fatigue cumulative que tu ne sens pas immédiatement. S2 dimanche : viser 7:30-8:00 min/km et FC strictement &lt;148.<br><br>
+        <span style="color:var(--amber);font-weight:500">Data :</span> Ton historique Strava montre une FC moyenne habituellement élevée sur les courtes sorties. Ce n'est pas un problème physiologique mais de gestion d'allure. Outil concret : regarder la FC pendant la sortie et ralentir quand elle dépasse 148.
+      </div>
+    </div>
+
+    <!-- Synthèse & consignes S2 -->
+    <div style="background:var(--green-dim);border:1px solid var(--green);border-radius:var(--r);padding:14px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--green);margin-bottom:8px">Consignes pour S2 · 30 mars - 5 avril</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--text2)"><span style="color:var(--green);flex-shrink:0">1.</span><span><strong style="color:var(--text)">Lundi :</strong> Endurance 55 min Z2, D+180. FC strictement &lt;145. Si la FC monte, marcher.</span></div>
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--text2)"><span style="color:var(--green);flex-shrink:0">2.</span><span><strong style="color:var(--text)">Mercredi :</strong> Renfo (monte-escalier + talon excentrique + ciseaux du tronc) PUIS footing 30 min Z1. Ne pas sauter le footing cette fois.</span></div>
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--text2)"><span style="color:var(--green);flex-shrink:0">3.</span><span><strong style="color:var(--text)">Vendredi :</strong> Trouver UNE côte (150-200 m D+). Faire <em>exactement</em> 6 montées × 3 min Z3 (FC 148-155) avec descente marchée entre chaque. Pas juste une sortie avec du D+.</span></div>
+        <div style="display:flex;gap:8px;font-size:12px;color:var(--text2)"><span style="color:var(--green);flex-shrink:0">4.</span><span><strong style="color:var(--text)">Dimanche :</strong> Lac de Saint-Point (15 km / D+420). Allure 7:30-8:00 min/km. FC &lt;145. Marcher toutes les montées &gt;10%.</span></div>
+      </div>
+    </div>
+
+    <!-- Note coach -->
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px">Note du coach</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">
+        S1 amputée mais pas catastrophique. Le plus important : <strong style="color:var(--text)">le D+ est au rendez-vous</strong> (307 m dimanche). L'unique chose à corriger dès S2 : ralentir sur les sorties longues. FC &lt;148, allure conversation. C'est contre-intuitif au début, mais c'est ce qui construit le moteur aérobique. <strong style="color:var(--green)">Continue d'envoyer tes activités chaque semaine.</strong>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);text-align:center;padding-top:4px">
+      Envoyer les activités Strava chaque semaine pour le rapport suivant
+    </div>
+
+  </div>`;
+  document.getElementById('rapport-content').innerHTML = html;
+}
 /* ═══════════════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════════════ */
@@ -1110,6 +1443,8 @@ renderProgress();
 renderExercices();
 renderPrevention();
 renderParcours();
+renderCalendrier();
+renderRapport();
 updateHomeForRace();
 </script>
 </body>
